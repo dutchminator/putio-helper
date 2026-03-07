@@ -18,7 +18,7 @@ Single-file Python app (`src/sonarr_putio_helper.py`) with a linear startup flow
 
 Uses Go-style `(result, error)` tuple returns throughout.
 
-Key dependencies: `putiopy` (Put.io API client), `watchdog` (filesystem event monitoring). Dev tooling: `ruff` (linting and formatting).
+Key dependencies: `putiopy` (Put.io API client), `watchdog` (filesystem event monitoring). Dev tooling: `ruff` (linting and formatting), `pytest` (testing).
 
 ## Required Environment Variables
 
@@ -44,6 +44,11 @@ uv sync --dev  # includes ruff
 ### Run locally
 ```bash
 PUTIO_OAUTH_TOKEN=... TORRENT_PATH=... PUTIO_PATH=... uv run python src/sonarr_putio_helper.py
+```
+
+### Run tests
+```bash
+uv run pytest tests/ -v
 ```
 
 ### Lint and format
