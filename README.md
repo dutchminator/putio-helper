@@ -56,6 +56,7 @@ services:
 * [x] Implement PUID/PGID support for Synology usage (and generally, we shouldn't run containers as root :P)
 * [x] Implement as Docker container instead of standalone script
 * [x] Implement deployment to ghcr.io image registry
+* [] Set up pre-commit hooks for ruff formatting
 * [] Implement CI/CD deployment to an image registry
 * [] Implement logging to its own docker folder?
 * [] Implement cleanup of torrent_blackhole
