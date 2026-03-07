@@ -14,16 +14,84 @@ We will require 4 env variables:
 """
 
 # imports
+import functools
+import random
 import time
 import os
 from pathlib import Path
 
 import putiopy
+import requests.exceptions
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
 # Magic constant, check every second unless defined otherwise
 TORRENT_POLL_DELAY = 1
+
+# Exceptions that indicate transient network/server issues worth retrying
+RETRYABLE_EXCEPTIONS = (
+    requests.exceptions.ConnectionError,
+    requests.exceptions.Timeout,
+    putiopy.ServerError,
+    OSError,
+)
+
+
+def retry_with_backoff(base_delay=2, max_delay=300, max_retries=None):
+    """
+    Decorator that retries a function on transient failures with exponential backoff.
+
+    Args:
+        base_delay: Initial delay in seconds between retries
+        max_delay: Maximum delay cap in seconds
+        max_retries: Maximum number of retries (None for unlimited)
+    """
+
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            attempt = 0
+            while True:
+                try:
+                    return func(*args, **kwargs)
+                except RETRYABLE_EXCEPTIONS as e:
+                    attempt += 1
+                    if max_retries is not None and attempt > max_retries:
+                        raise
+                    delay = min(base_delay * (2 ** (attempt - 1)), max_delay)
+                    jitter = random.uniform(0, delay * 0.25)
+                    wait = delay + jitter
+                    print(
+                        f"[retry] {func.__name__} attempt {attempt} failed: {e}. "
+                        f"Retrying in {wait:.1f}s..."
+                    )
+                    time.sleep(wait)
+
+        return wrapper
+
+    return decorator
+
+
+@retry_with_backoff(max_retries=None)
+def _connect(config):
+    client = putiopy.Client(config["token"], use_retry=True)
+    response = client.Account.info()
+    return client, response
+
+
+@retry_with_backoff(max_retries=None)
+def _putio_list_files(client, parent_id):
+    return client.File.list(parent_id=parent_id, file_type="FOLDER")
+
+
+@retry_with_backoff(max_retries=None)
+def _putio_create_folder(client, folder, parent_id):
+    return client.File.create_folder(folder, parent_id=parent_id)
+
+
+@retry_with_backoff(max_retries=5)
+def _add_torrent(client, path, parent_id):
+    return client.Transfer.add_torrent(path=path, parent_id=parent_id)
 
 
 def collect_environment() -> tuple[dict | None, Exception | None]:
@@ -87,8 +155,7 @@ def connect_putio(config: dict) -> tuple[putiopy.Client | None, Exception | None
     """
 
     try:
-        client = putiopy.Client(config["token"], use_retry=True)
-        response = client.Account.info()
+        client, response = _connect(config)
     except putiopy.ClientError as client_err:
         print("PutIO client error: ", client_err.message)
         return None, client_err
@@ -136,9 +203,7 @@ def get_or_create_putio_folder(
         # If the current parent_id has not been created by us
         if not created_parent:
             # List every folder at current parent_id
-            putio_folder_list = putio_client.File.list(
-                parent_id=parent_id, file_type="FOLDER"
-            )
+            putio_folder_list = _putio_list_files(putio_client, parent_id)
 
             # Search for the current "folder" name
             matching_folder = [f for f in putio_folder_list if f.name == folder]
@@ -152,14 +217,13 @@ def get_or_create_putio_folder(
         else:
             # If it does not yet exist, create it in current parent_id
             try:
-                new_putio_folder_obj = putio_client.File.create_folder(
-                    folder, parent_id=parent_id
+                new_putio_folder_obj = _putio_create_folder(
+                    putio_client, folder, parent_id
                 )
                 print(
                     f"Created new Putio folder [{folder}] in parent_id [{parent_id}]."
                 )
             except Exception as e:
-                # We don't expect an issue creating the folder as it didn't exist, but who knows....
                 return None, e
 
             # output of putio_client.File.create_folder() is a putiopy.File object
@@ -203,21 +267,20 @@ def configure_torrent_observer(
         # Get the file from the event
         new_torrent = event.src_path
         try:
-            putio_transfer = putio_client.Transfer.add_torrent(
+            putio_transfer = _add_torrent(
+                putio_client,
                 path=new_torrent,
                 parent_id=target_parent_id,
             )
             print(
                 f"Started Putio transfer for [name={putio_transfer.name}] [id={putio_transfer.id}]"
             )
-            # print(f"PutIO transfer response: {putio_transfer}")
         except putiopy.ClientError as e:
             # Print any putio.py client errors but dont halt execution
             print(e)
         except Exception as e:
-            # For other exceptions we should raise and exit
-            raise e
-            exit
+            # Log the error but don't crash the observer thread
+            print(f"[error] Failed to add torrent after retries: {e}")
 
     # Assign on_created function to event handler
     torrent_event_handler.on_created = on_torrent_created
