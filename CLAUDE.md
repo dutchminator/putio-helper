@@ -8,7 +8,7 @@ Sonarr Putio Helper is a Python application that monitors a local directory for 
 
 ## Architecture
 
-Single-file Python app (`src/sonarr-putio-helper.py`) with a linear startup flow:
+Single-file Python app (`src/sonarr_putio_helper.py`) with a linear startup flow:
 1. Collect environment variables (`collect_environment`)
 2. Verify local filesystem paths (`verify_filesystem`)
 3. Authenticate with Put.io API (`connect_putio`)
@@ -43,13 +43,13 @@ uv sync --dev  # includes ruff
 
 ### Run locally
 ```bash
-PUTIO_OAUTH_TOKEN=... TORRENT_PATH=... PUTIO_PATH=... uv run python src/sonarr-putio-helper.py
+PUTIO_OAUTH_TOKEN=... TORRENT_PATH=... PUTIO_PATH=... uv run python src/sonarr_putio_helper.py
 ```
 
 ### Lint and format
 ```bash
-uv run ruff check src/sonarr-putio-helper.py
-uv run ruff format src/sonarr-putio-helper.py
+uv run ruff check src/sonarr_putio_helper.py
+uv run ruff format src/sonarr_putio_helper.py
 ```
 
 ## Development Guidelines

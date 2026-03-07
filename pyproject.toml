@@ -10,4 +10,8 @@ dependencies = [
 [dependency-groups]
 dev = [
     "ruff",
+    "pytest",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

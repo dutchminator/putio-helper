@@ -10,7 +10,7 @@ COPY pyproject.toml uv.lock /app/
 RUN cd /app && uv sync --no-dev --no-editable
 
 # Copy logic
-COPY src/sonarr-putio-helper.py /app/src/sonarr-putio-helper.py
+COPY src/sonarr_putio_helper.py /app/src/sonarr_putio_helper.py
 COPY src/init.sh /app/init.sh
 
 # What user are we running as
