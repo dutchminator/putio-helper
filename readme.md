@@ -12,7 +12,7 @@ Scans a local folder for new torrent/magnet files, and starts a transfer on Puti
 - PGID: ID for the group the user belongs to with permissions to the torrent folder
 
 ### Building the image
-Simple. `docker build -t putio-helper .` in the /src folder.
+Simple. `docker build -t putio-helper .` from the project root.
 
 ### Example docker run statement
 ```bash
