@@ -1,0 +1,13 @@
+[project]
+name = "sonarr-putio-helper"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "watchdog",
+    "putio.py",
+]
+
+[dependency-groups]
+dev = [
+    "ruff",
+]
