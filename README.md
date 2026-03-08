@@ -1,4 +1,4 @@
-# Sonarr Putio Helper
+# Putio Helper
 
 Scans a local folder for new torrent/magnet files, and starts a transfer on Putio in the designated target folder. It scans for new torrent/magnet files every POLL_DELAY seconds.
 
@@ -18,12 +18,12 @@ Simple. `docker build -t putio-helper .` from the project root.
 ```bash
 docker run -it \
 -e TORRENT_PATH=/torrent_blackhole \
--e PUTIO_PATH=sonarr \
+-e PUTIO_PATH=my_putio_path \
 -e TORRENT_POLL_DELAY=1 \
 -e PUTIO_OAUTH_TOKEN=YOURTOKENGOESHERE \
--e PGID=65541 \
--e PUID=1029 \
--v Path/To/torrent_blackhole_test:/torrent_blackhole \
+-e PGID=your_usergroup_id \
+-e PUID=your_user_id \
+-v Local/Path/To/torrent_blackhole:/torrent_blackhole \
 putio-helper
 ```
 
@@ -40,7 +40,7 @@ services:
     image: ghcr.io/dutchminator/putio-helper:latest
     restart: always
     volumes:
-      - /path/to/torrent_blackhole:/torrent_blackhole  # or your own mount path
+      - local/path/to/torrent_blackhole:/torrent_blackhole  # or your own mount path
     environment:
       - PUID=  # user id
       - PGID=  # usergroup id
