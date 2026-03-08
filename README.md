@@ -53,14 +53,15 @@ services:
 
 ## Development
 ### Development TODOs
-* [x] Implement PUID/PGID support for Synology usage (and generally, we shouldn't run containers as root :P)
 * [x] Implement as Docker container instead of standalone script
-* [x] Implement deployment to ghcr.io image registry
-* [] Set up pre-commit hooks for ruff formatting
-* [] Implement CI/CD deployment to an image registry
+* [x] Implement PUID/PGID support for future Synology usage (and generally, we shouldn't run containers as root :P)
+* [x] Do manual deployment to ghcr.io image registry
+* [x] Set up pre-commit hooks for ruff formatting
+* [x] Implement CI/CD deployment to ghcr.io image registry
 * [] Implement logging to its own docker folder?
 * [] Implement cleanup of torrent_blackhole
 * [] Implement cleanup of Putio folder
 
 ### How to contribute
-TODO
+- The environment has uv dev requirements defined to get started and test your work.
+- Submit an issue and/or PR.
