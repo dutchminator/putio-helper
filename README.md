@@ -33,10 +33,10 @@ version: '3'
 
 services:
 #---------------------------------------------------------------------#
-#                Sonarr PutIO Helper -  Send torrents to PutIO        #
+#                PutIO Helper -  Send torrents to PutIO               #
 #---------------------------------------------------------------------#
-  sonarr-putio-helper:
-    container_name: sonarr-putio-helper
+  putio-helper:
+    container_name: putio-helper
     image: ghcr.io/dutchminator/putio-helper:latest
     restart: always
     volumes:
