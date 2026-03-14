@@ -15,4 +15,4 @@ Running as user/group: $(id container-user)
 "
 
 # Start the app as container-user, -u for unbuffed print output
-su -c "uv run python -u /app/src/sonarr_putio_helper.py" container-user
+su -c "/app/.venv/bin/python -u /app/src/sonarr_putio_helper.py" container-user
